@@ -1,0 +1,79 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+Most Positive/Negative Comments
+{% endblock %}
+
+{% block maincode %}
+   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+
+      google.charts.load('current', {'packages':['corechart','table']});
+      google.charts.setOnLoadCallback(drawChart);
+      
+      function drawChart() {
+      
+        // Create the data tables.
+        var pos_data = new google.visualization.DataTable();
+        pos_data.addColumn('string', 'Semester');
+        pos_data.addColumn('string', 'Section');
+        pos_data.addColumn('string', 'Question');
+        pos_data.addColumn('string', 'Comment');      
+        pos_data.addColumn('number', 'Sentiment');
+        pos_data.addColumn('number', 'Magnitude');
+        pos_data.addRows([
+{% for comment in pos_comments %}
+  ['{{ comment[0] }}', '{{comment[1]}}', '{{comment[4]}}', '{{comment[3]}}', {{comment[5]}}, {{comment[6]}} ],
+{% endfor %}      
+        ]);
+
+        pos_data.sort({column: 4, desc: true});
+
+        var neg_data = new google.visualization.DataTable();
+        neg_data.addColumn('string', 'Semester');
+        neg_data.addColumn('string', 'Section');
+        neg_data.addColumn('string', 'Question');
+        neg_data.addColumn('string', 'Comment');
+        neg_data.addColumn('number', 'Sentiment');
+        neg_data.addColumn('number', 'Magnitude');
+        neg_data.addRows([
+{% for comment in neg_comments %}
+  ['{{ comment[0] }}', '{{comment[1]}}', '{{comment[4]}}', '{{comment[3]}}', {{comment[5]}}, {{comment[6]}} ],
+{% endfor %}      
+        ]);
+
+        neg_data.sort({column: 4, desc: false});
+      
+        var table = new google.visualization.Table(document.getElementById('poscom_div'));
+        table.draw(pos_data, {showRowNumber: true, width: '80%', height: '100%'});
+      
+        var table = new google.visualization.Table(document.getElementById('negcom_div'));
+        table.draw(neg_data, {showRowNumber: true, width: '80%', height: '100%'});
+
+      
+      }
+    </script>
+{% endblock %}
+
+{% block maincontent %}
+
+    <!--div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+      <h1 class="h2">Most positive / negative comments</h1>
+    </div-->
+
+<p style="margin-top:1rem;margin-bottom:1rem;">Below are two tables showing the most positive and negative comments, respectively.  Comments are automatically sorted by a combination of sentiment and magnitude, hopefully showing the comments students felt most strongly about. Only one comment per student is shown.</p>
+
+<h2 class="h2">Most positive comments</h2>
+<center>
+  <div id="poscom_div"></div>
+</center>  
+
+    <p style="margin-top:2rem;margin-bottom:2rem">
+      <h2 class="h2">Most negative comments</h2>
+    </p>
+
+<center>    
+  <div id="negcom_div"></div>
+</center>
+      
+{% endblock %}

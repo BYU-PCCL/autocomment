@@ -1,0 +1,92 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+Searchable comments
+{% endblock %}
+
+{% block maincode %}
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart','table','controls']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var raw_comment_data = get_full_comments();
+        var comment_data = new google.visualization.DataView(raw_comment_data);
+        comment_data.setColumns([SEMESTER,SECTION,QUESTION,COMMENT,SCORE,MAG]);
+
+        var tableChart = new google.visualization.ChartWrapper({
+          'chartType': 'Table',
+          'containerId': 'comments_div',
+          'options': {
+            'width': '80%',
+            'height': '100%',
+            'showRowNumber': true
+          }
+        });
+
+        var dashboard = new google.visualization.Dashboard(
+            document.getElementById('dashboard_div'));
+
+        var commentFilter = new google.visualization.ControlWrapper({
+          'controlType': 'StringFilter',
+          'containerId': 'comment_filter_div',
+          'options': {
+            'filterColumnLabel': 'Comment',
+            'matchType': 'any',
+          }
+        });
+
+        var semesterFilter = new google.visualization.ControlWrapper({
+          'controlType': 'CategoryFilter',
+          'containerId': 'semester_filter_div',
+          'options': {
+            'filterColumnLabel': 'Semester',
+          }
+        });
+
+        var sectionFilter = new google.visualization.ControlWrapper({
+          'controlType': 'CategoryFilter',
+          'containerId': 'section_filter_div',
+          'options': {
+            'filterColumnLabel': 'Section',
+          }
+      });
+      
+        var questionFilter = new google.visualization.ControlWrapper({
+          'controlType': 'CategoryFilter',
+          'containerId': 'question_filter_div',
+          'options': {
+            'filterColumnLabel': 'Question',
+          }
+        });
+
+        dashboard.bind([commentFilter,semesterFilter,sectionFilter,questionFilter], tableChart);
+
+        dashboard.draw(comment_data);
+      
+      }
+    </script>
+{% endblock %}
+
+{% block maincontent %}
+<!--div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">All Comments</h1>
+      </div-->
+
+<p style="margin-top:1rem;margin-bottom:0;">This shows all available comments.  Data can be sorted by clicking on a column label.  The controls below can be used to filter the comments to see data for only a selected section, year, or question.  Typing into the "comment" box will search for a specific keyword or phrase.  If multiple filters are specified, they are AND'ed together.</p>
+
+    <!--Div that will hold the dashboard-->
+    <div id="dashboard_div">
+      <!--Divs that will hold each control and chart-->
+      <div id="comment_filter_div"></div>
+      <div id="semester_filter_div"></div>
+      <div id="section_filter_div"></div>
+      <div id="question_filter_div"></div>
+      <center>
+	<div id="comments_div"></div>
+      </center>
+    </div>
+
+{% endblock %}

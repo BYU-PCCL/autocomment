@@ -1,0 +1,47 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+By Question
+{% endblock %}
+
+{% block maincode %}
+   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+
+      google.charts.load('current', {'packages':['corechart','table']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Question');
+        data.addColumn('number', 'Sentiment');
+        data.addRows([
+{% for c in avgs %}
+  ['{{ c[0] }}', {{c[1]}} ],
+{% endfor %}      
+        ]);
+
+        data.sort({column: 1, desc: true});
+
+        options = {
+          legend: { position: "none" },
+          chartArea: {'width': '40%', 'height': '80%'},      
+        };
+      
+        var table = new google.visualization.BarChart(document.getElementById('barchart_div'));
+        table.draw( data, options);
+      
+      }
+    </script>
+{% endblock %}
+
+{% block maincontent %}
+
+<p style="margin-top:1rem;margin-bottom:0;">This shows the average sentiment by question. Questions are automatically sorted from highest-scoring to lowest-scoring.</p>
+
+<center>
+  <div id="barchart_div" style="height:600px;"></div>
+</center>
+      
+{% endblock %}

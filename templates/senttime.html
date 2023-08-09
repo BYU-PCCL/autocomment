@@ -1,0 +1,161 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+Sentiment Over Time
+{% endblock %}
+
+{% block maincode %}
+   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+
+      // sort array ascending
+      const asc = arr => arr.sort((a, b) => a - b);
+      const sum = arr => arr.reduce((a, b) => a + b, 0);
+      const mean = arr => sum(arr) / arr.length;
+      // sample standard deviation
+      const std = (arr) => {
+        const mu = mean(arr);
+        const diffArr = arr.map(a => (a - mu) ** 2);
+        return Math.sqrt(sum(diffArr) / (arr.length - 1));
+      };
+
+      const quantile = (arr, q) => {
+        const sorted = asc(arr);
+        const pos = (sorted.length - 1) * q;
+        const base = Math.floor(pos);
+        const rest = pos - base;
+        if (sorted[base + 1] !== undefined) {
+          return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+        } else {
+          return sorted[base];
+        }
+      };
+      const q10 = arr => quantile(arr, .10);
+      const q25 = arr => quantile(arr, .25);
+      const q50 = arr => quantile(arr, .50);
+      const q75 = arr => quantile(arr, .75);
+      const q90 = arr => quantile(arr, .90);
+      
+      var global_data;
+      var global_chart;
+      
+      google.charts.load('current', {'packages':['corechart','table','controls']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      // convert a string of the format 'F 2020' to something sortable.
+      var sem_to_int = {};
+      sem_to_int['W'] = 0;
+      sem_to_int['Sp'] = 1;
+      sem_to_int['Su'] = 2;
+      sem_to_int['F'] = 3;      
+      function oval(dataTable, rowNum){
+        label = dataTable.getValue(rowNum, 0);
+        parts = label.split(' ');
+        return parts[1] + sem_to_int[parts[0]] + ' ' + label;
+      }
+      
+      function drawChart() {
+      
+        var raw_comment_data = get_full_comments();
+
+        // first, rework the labels a bit so that the table is correctly sorted.
+        var sraw_comment_data = new google.visualization.DataView(raw_comment_data);
+        sraw_comment_data.setColumns(
+          [
+            {sourceColumn:SEMESTER,calc:oval,label:'Semester',type:'string'}, // convert to correctly sortable labels
+            SECTION,QUESTION,COMMENT,SCORE
+        ]);
+
+        // now group by the year column, and calculate sentiment values
+        var agg_comment_data = google.visualization.data.group(
+          sraw_comment_data,
+          [0],
+          [
+            {'column': 4, 'aggregation': q50, 'type': 'number'},
+            {'column': 4, 'aggregation': q10, 'type': 'number'},
+            {'column': 4, 'aggregation': q25, 'type': 'number'},
+            {'column': 4, 'aggregation': q75, 'type': 'number'},
+            {'column': 4, 'aggregation': q90, 'type': 'number'},      
+          ]
+        );
+
+        // finally, create a new view that has the proper roles annotating the columns.  Wish I didn't have to create an entire view for this!
+        var comment_data = new google.visualization.DataView(agg_comment_data);
+        comment_data.setColumns(
+          [
+            0,
+            {sourceColumn:1,                label:'Median sentiment'},
+            {sourceColumn:2,role:'interval',label:'10% quartile'},
+            {sourceColumn:3,role:'interval',label:'25% quartile'},
+            {sourceColumn:4,role:'interval',label:'75% quartile'},
+            {sourceColumn:5,role:'interval',label:'90% quartile'},
+          ]
+        );
+      
+        global_data = comment_data;
+
+        var options = {
+          height: 500,
+          legend: {position: 'none'},
+          hAxis: {
+            gridlines: {color: '#fff'}
+          },
+          lineWidth: 0,
+          series: [{'color': '#D3362D'}],
+          intervals: {
+            barWidth: 1,
+            boxWidth: 1,
+            lineWidth: 2,
+            style: 'boxes'
+          },
+          interval: {
+            max: {
+              style: 'bars',
+              fillOpacity: 1,
+              color: '#777'
+            },
+            min: {
+              style: 'bars',
+              fillOpacity: 1,
+              color: '#777'
+            }
+          }
+        };
+
+        var options_bars = {
+          series: [{'color': '#D9544C'}],
+          intervals: { style: 'boxes' },
+          legend: 'none',
+          'chartArea': {'width': '80%', 'height': '80%'},
+
+        };
+      
+        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+        chart.draw(comment_data, options_bars);
+      
+        var table = new google.visualization.Table(document.getElementById('table_div'));
+        table.draw(comment_data);
+      }
+
+      
+    </script>
+{% endblock %}
+
+{% block maincontent %}
+
+      <!--div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Sentiment over Time</h1>
+      </div-->
+
+<p style="margin-top:1rem;margin-bottom:0;">This graph shows the average sentiment over time.  All comments from each semester are included.  The main line in the graph shows the median sentiment; boxes around the median denote the 10%, 25%, 75%, and 90% quartiles.  Raw data is below.</p>
+<center>
+      <!--Divs that will hold each control and chart-->
+      <div id="chart_div" style="height:500px;"></div>
+
+<p style="margin-top:2rem;margin-bottom:2rem;">
+  <h2>Raw data</h2>
+</p>      
+      
+      <div id="table_div" style="height:500px;"></div>
+</center>      
+{% endblock %}

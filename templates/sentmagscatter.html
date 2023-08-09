@@ -1,0 +1,95 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+Sentiment vs. Magnitude
+{% endblock %}
+
+{% block maincode %}
+   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+
+      var global_e;
+      var global_view;
+      
+      google.charts.load('current', {'packages':['corechart','table','controls']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+      
+        var raw_comment_data = get_full_comments();
+				 
+        var comment_data = new google.visualization.DataView(raw_comment_data);
+        comment_data.setColumns(
+          [ JSCORE,JMAG,
+            // {sourceColumn:SCORE,calc:get_color,label:'color',type:'string',role:'style'}, // convert to correctly sortable labels
+          ]);
+
+        var chart = new google.visualization.ScatterChart(document.getElementById('scatter_div'));
+        options = {
+            dataOpacity: 0.25,
+            legend: 'none',
+            hAxis: {title: 'Sentiment', minValue: -1, maxValue: 1},
+            vAxis: {title: 'Magnitude', minValue: 0, maxValue: 5 },
+            chartArea: {'width': '90%', 'height': '80%'},
+	    //explorer: {},
+          };
+
+        chart.draw(comment_data, options);
+
+        function omoHandler(e) {
+          row_num = e['row']
+
+          year = raw_comment_data.getValue( row_num, SEMESTER );
+          section = raw_comment_data.getValue( row_num, SECTION );
+          question = raw_comment_data.getValue( row_num, QUESTION );
+          comment = raw_comment_data.getValue( row_num, COMMENT );
+          sentiment = raw_comment_data.getValue( row_num, SCORE ).toFixed(2);
+          magnitude = raw_comment_data.getValue( row_num, MAG ).toFixed(2);      
+
+	  $("#year").html( year );
+	  $("#section").html( section );
+	  $("#question").html( question );
+          $("#sentiment").html( sentiment );
+      	  $("#magnitude").html( magnitude );
+	  $("#comment").html( comment );
+	  
+        }
+      
+        google.visualization.events.addListener(chart, 'onmouseover', omoHandler);      
+      }
+      
+    </script>
+{% endblock %}
+
+{% block maincontent %}
+
+<p style="margin-top:1rem;margin-bottom:2rem;">This graph shows a scatterplot of the sentiment and magnitude of the selected comments.  You can hover over any datapoint to see the details of the comment next to the chart.  Some random jitter has been added to individual coordinates to improve the ability to visualize density of comments.</p>
+
+<!--Divs that will hold each control and chart-->
+<!-- 
+      <div id="comment_filter_div"></div>
+      <div id="semester_filter_div"></div>
+      <div id="section_filter_div"></div>
+      <div id="question_filter_div"></div>      
+      <div id="scatter_div" style="height:500px;"></div>
+      <div id="table_div"></div>      
+      -->
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <!--Divs that will hold each control and chart-->
+            <div id="scatter_div" style="height:600px;"></div>
+        </div>
+        <div class="col-md-4">
+            <b><span id="year"></span>-<span id="section"></span></b><br>
+            Sentiment: <span id="sentiment"></span><br>
+            Magnitude: <span id="magnitude"></span><br>	    
+            <span id="question"></span><br>
+	    &nbsp; <br>
+            <div id="comment" style="display:inline-block;"></div>
+        </div>
+    </div>
+</div>
+      
+{% endblock %}

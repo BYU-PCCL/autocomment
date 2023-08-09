@@ -1,0 +1,64 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+About this system
+{% endblock %}
+
+{% block maincode %}
+{% endblock %}
+
+{% block maincontent %}
+
+      <!--div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Topical Clustering</h1>
+      </div-->
+
+  <p style="margin-top:1rem;margin-bottom:0;">
+  These visualizations were produced entirely by automatic machine learning algorithms.  No human cherry-picking of parameters was selected.  Here we explain the background behind the key pieces.
+  </p>
+
+  <p style="margin-top:1rem;margin-bottom:0;">  
+    <b>Sentiment and Magnitude</b>
+  </p>
+
+  <p style="margin-top:1rem;margin-bottom:0;">    
+  To calculate sentiment and magnitude, <a href="https://cloud.google.com/natural-language">Google's Cloud Natural Language Sentiment Analyzer</a> was used.  Each comment is assigned a sentiment ranging from -1 to 1, representing negative and positive sentiments, respectively.  Each comment is also assigned a magnitude, to differentiate between (for example) positive-but-uninformative comments (such as "I liked this class") and positive-and-informative comments (which are typically longer and contain more detail).
+  </p>
+  
+  <p style="margin-top:1rem;margin-bottom:0;">    
+  <b>Entity-level sentiment</b>
+  </p>
+  
+<p style="margin-top:1rem;margin-bottom:0;">
+  To calculate entity sentiments, Google's <a href="https://cloud.google.com/natural-language">Entity Sentiment Analyzer</a> was used.  The algorithm automatically extracts entities from each comment, and assigns each entity a sentiment and magnitude based on how it is used in the context of the comment.
+  </p>
+
+  <p style="margin-top:1rem;margin-bottom:0;">    
+  <b>Topic clustering</b>
+  </p>
+  
+  <p style="margin-top:1rem;margin-bottom:0;">    
+  For topic clustering, each comment was encoded using Google's <a href="https://tfhub.dev/google/universal-sentence-encoder-qa/3">universal-sentence-encoder-qa/3</a>, resulting in a 512-dimensional vector of semantic features.  This was reduced to a 5-dimensional feature vector using PCA, and then projected to a 2-dimensional manifold using T-SNE.
+  </p>
+  
+  
+  <p style="margin-top:1rem;margin-bottom:0;">    
+  <b>Word clouds</b>
+  </p>
+  
+  <p style="margin-top:1rem;margin-bottom:0;">    
+  Comments were preprocessed by removing punctuation and stop-words, and then lemmatized using the <a href="https://www.nltk.org/_modules/nltk/stem/wordnet.html">NLTK WordNet lemmatizer</a>.  Size of a word indicates relative frequency in a set of comments.  Layout algorithms were done using the <a href="https://github.com/amueller/word_cloud">python WordCloud package</a>.
+  </p>
+  
+  <p style="margin-top:1rem;margin-bottom:0;">    
+  <b>Visualizations</b>  
+  </p>
+  
+  <p style="margin-top:1rem;margin-bottom:0;">    
+    All charting and other visualizations are generated using <a href="https://charts.google.com/">Google Charts</a>.
+  </p>
+  
+</p>
+
+      
+{% endblock %}

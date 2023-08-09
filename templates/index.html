@@ -1,0 +1,43 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+Introduction
+{% endblock %}
+
+{% block maincode %}
+{% endblock %}
+
+{% block maincontent %}
+
+      <!--div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Topical Clustering</h1>
+      </div-->
+
+<p style="margin-top:2rem;margin-bottom:2rem;">
+  &nbsp;
+</p>
+
+<h3>Welcome!</h3>      
+<img src="sentiment_intro.png" align="right" width="400px">
+
+<p style="margin-top:1rem;margin-bottom:0;">
+This is an automatic student comment analyzer based on various machine learning and natural language processing techniques.  Click on the links in the navigation pane to the left to see a variety of visualizations designed to convey insight about large numbers of student comments.
+</p>
+
+<p style="margin-top:1rem;margin-bottom:0;">  
+At the heart of this system is an analysis of the <b>sentiment and magnitude</b> of each comment.  See the image at the right for an example.  Each sentence in a comment is assigned a <b>sentiment</b>, which is a numeric score indicating if the sentence conveys a negative sentiment or a positive sentiment.  Numeric values range from <b>-1 to +1</b>.  An overall sentiment score for the entire coment is assigned by combining the sentiment scores for individual sentences.  
+</p>
+
+<p style="margin-top:1rem;margin-bottom:0;">
+  Similarly, sentences and overall comments are assigned a <b>magnitude</b>, which represents the "strength" of the sentiment.  Some comments can be unambigiously positive, such as "Dr. Smith is a great professor.", but which aren't passionate or particularly informative. <b>It is therefore useful to look for comments that have extreme values for sentiment (ie, close to +1 or -1), as well as a large magnitude.</b>
+</p>
+
+<p style="margin-top:1rem;margin-bottom:0;">
+Most of the visualizations in this system are derived by sorting, filtering, categorizing, and visualizing some combination of sentiment and magnitude.  Some visualizations invoke additional textual analysis or machine learning algorithms.
+</p>
+
+<p style="margin-top:1rem;margin-bottom:0;">    
+More information about the specific technical methodology is <a href="about.html">available on our about page</a>.
+</p>
+      
+{% endblock %}

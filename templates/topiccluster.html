@@ -1,0 +1,147 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+Comments Clustered by Topic
+{% endblock %}
+
+{% block maincode %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="js-colormaps.js"></script>
+    <script type="text/javascript">
+
+      var global_cd;
+      var global_e;
+      
+      google.charts.load('current', {'packages':['corechart','table','controls']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function enforceBounds(x) {
+            if (x < 0) {
+                return 0;
+            } else if (x > 1){
+                return 1;
+            } else {
+                return x;
+            }
+        }
+
+        function interpolateLinearly(x, values) {
+
+            // Split values into four lists
+            var x_values = [];
+            var r_values = [];
+            var g_values = [];
+            var b_values = [];
+            for (i in values) {
+                x_values.push(values[i][0]);
+                r_values.push(values[i][1][0]);
+                g_values.push(values[i][1][1]);
+                b_values.push(values[i][1][2]);
+            }
+
+            var i = 1;
+            while (x_values[i] < x) {
+                i = i+1;
+            }
+            i = i-1;
+
+            var width = Math.abs(x_values[i] - x_values[i+1]);
+            var scaling_factor = (x - x_values[i]) / width;
+
+            // Get the new color values though interpolation
+            var r = r_values[i] + scaling_factor * (r_values[i+1] - r_values[i])
+            var g = g_values[i] + scaling_factor * (g_values[i+1] - g_values[i])
+            var b = b_values[i] + scaling_factor * (b_values[i+1] - b_values[i])
+
+            return [enforceBounds(r), enforceBounds(g), enforceBounds(b)];
+
+      }
+				 
+      function componentToHex(c) {
+        var hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+      }
+      function rgbToHex(r, g, b) {
+        return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+      }
+
+      function get_color(dataTable, rowNum){
+        sentiment = dataTable.getValue(rowNum, SCORE);
+	sentiment = (sentiment + 1.0)/2.0;  // convert from [-1,1] -> [0,1]
+        var color = interpolateLinearly(sentiment, RdBu);
+        r = Math.round(255*color[0]);
+        g = Math.round(255*color[1]);
+        b = Math.round(255*color[2]);
+        return 'point {fill-color:'+rgbToHex(r,g,b)+'}';
+      }
+
+      function drawChart() {
+
+        var raw_comment_data = get_full_comments();
+				 
+        var comment_data = new google.visualization.DataView(raw_comment_data);
+        comment_data.setColumns(
+          [ TOPICX,TOPICY,
+            {sourceColumn:SCORE,calc:get_color,label:'color',type:'string',role:'style'}, // convert to correctly sortable labels
+          ]);
+
+        var chart = new google.visualization.ScatterChart(document.getElementById('scatter_div'));
+        options = {
+            dataOpacity: 0.5,
+            legend: 'none',
+            chartArea: {'width': '100%', 'height': '100%'},
+            hAxis: { textPosition: 'none' },
+            vAxis: { textPosition: 'none' },
+	    explorer: {},
+          };
+
+	  chart.draw(comment_data, options);
+      
+        function omoHandler(e) {
+          row_num = e['row']
+
+          year = raw_comment_data.getValue( row_num, SEMESTER );
+          section = raw_comment_data.getValue( row_num, SECTION );
+          question = raw_comment_data.getValue( row_num, QUESTION );
+          comment = raw_comment_data.getValue( row_num, COMMENT );
+          sentiment = raw_comment_data.getValue( row_num, SCORE ).toFixed(2);
+
+	  $("#year").html( year );
+	  $("#section").html( section );
+	  $("#question").html( question );
+	  $("#sentiment").html( sentiment );
+	  $("#comment").html( comment );
+	  
+          //console.log( year + " " + section + " " + question + " " + comment + " " + sentiment );
+	  
+        }
+	  
+        //google.visualization.events.addListener(chart, 'select', selectHandler);
+        google.visualization.events.addListener(chart, 'onmouseover', omoHandler);
+      }
+
+      
+    </script>
+{% endblock %}
+
+{% block maincontent %}
+
+<p style="margin-top:1rem;margin-bottom:2rem;">This shows comments approximately clusted by topic.  Hovering over data point will show details.  Points are colored by sentiment, with red indicating negative sentiment and blue representing positive sentiment.</p>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <!--Divs that will hold each control and chart-->
+            <div id="scatter_div" style="height:600px;"></div>
+        </div>
+        <div class="col-md-4">
+            <b><span id="year"></span>-<span id="section"></span></b><br>
+            Sentiment: <span id="sentiment"></span><br>
+            <span id="question"></span><br>
+	    &nbsp; <br>
+            <div id="comment" style="display:inline-block;"></div>
+        </div>
+    </div>
+</div>
+      
+{% endblock %}

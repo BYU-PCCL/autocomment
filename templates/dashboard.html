@@ -1,0 +1,124 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+Overview
+{% endblock %}
+
+{% block maincode %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+
+      // sort array ascending
+      const asc = arr => arr.sort((a, b) => a - b);
+      const sum = arr => arr.reduce((a, b) => a + b, 0);
+      const mean = arr => sum(arr) / arr.length;
+      // sample standard deviation
+      const std = (arr) => {
+        const mu = mean(arr);
+        const diffArr = arr.map(a => (a - mu) ** 2);
+        return Math.sqrt(sum(diffArr) / (arr.length - 1));
+      };
+
+      const quantile = (arr, q) => {
+        const sorted = asc(arr);
+        const pos = (sorted.length - 1) * q;
+        const base = Math.floor(pos);
+        const rest = pos - base;
+        if (sorted[base + 1] !== undefined) {
+          return sorted[base] + rest * (sorted[base + 1] - sorted[base]);
+        } else {
+          return sorted[base];
+        }
+      };
+      const q10 = arr => quantile(arr, .10);
+      const q25 = arr => quantile(arr, .25);
+      const q50 = arr => quantile(arr, .50);
+      const q75 = arr => quantile(arr, .75);
+      const q90 = arr => quantile(arr, .90);
+
+      function clipped_q50( values ) {
+        med = q50( values );
+        return Math.min(Math.max(med, 0.5), 1.5);
+      }
+
+      function clipped_avg( values ) {
+        med = google.visualization.data.avg( values );
+        return Math.min(Math.max(med, 0.5), 1.5);
+      }
+      
+      var global_data;
+      var global_chart;
+      
+      google.charts.load('current', {'packages':['corechart','table','controls']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function count(values) {
+        return values.length;
+      }
+      
+      function yearf(values) {
+        parts = values[0].split(' ');
+        return parts[1];
+      }
+      
+      function oval(dataTable, rowNum){
+        year = dataTable.getValue(rowNum, SEMESTER);  // 'W 2020'
+        sem = dataTable.getValue(rowNum, SECTION);   // 'CS 330 (001)'
+        return year + ' ' + sem;
+      }
+      
+      function drawChart() {
+      
+        var raw_comment_data = get_full_comments();
+
+        // first, rework the labels a bit so that the table is correctly sorted.
+        var sraw_comment_data = new google.visualization.DataView(raw_comment_data);
+        sraw_comment_data.setColumns(
+          [
+            {sourceColumn:SEMESTER,calc:oval,label:'Class',type:'string'}, // convert to correctly sortable labels
+            SEMESTER,SCORE,MAG
+        ]);
+
+        // now group by the class column, and calculate sentiment values
+        // note that these column labels are no longer related to the primary schema!
+        var comment_data = google.visualization.data.group(
+          sraw_comment_data,
+          [0],
+          [
+            {'column': 2, 'aggregation': google.visualization.data.avg, 'type': 'number', label:'Mean sentiment'},
+            {'column': 1, 'aggregation': count, 'type': 'number', label:'Comment count'},
+            {'column': 1, 'aggregation': yearf, 'type': 'string', label:'Semester'},
+            {'column': 3, 'aggregation': clipped_avg, 'type': 'number', label:'Clipped mean magnitude'},
+          ]
+        );
+        global_data = comment_data;
+      
+        // var table = new google.visualization.Table(document.getElementById('table_div'));
+        // table.draw(comment_data);
+
+        var options = {
+          title: '',
+          hAxis: {title: 'Mean sentiment'},
+          vAxis: {title: 'Number of comments'},
+          bubble: {textStyle: {fontSize: 11}},
+          chartArea: {'width': '80%', 'height': '80%'},      
+          // explorer: {},   // turn on explorer mode
+        };
+
+        var chart = new google.visualization.BubbleChart(document.getElementById('chart_div'));
+        chart.draw(comment_data, options);
+      }
+
+      
+    </script>
+
+
+{% endblock %}
+
+{% block maincontent %}
+
+<p style="margin-top:1rem;margin-bottom:0;">This display shows each course taught, with the mean sentiment on the x-axis and the number of comments on the y-axis.  The size of each dot is proportional to the mean magnitude of comments.  The best mix of comments is therefore large dots in the upper-right corner of the plot, indicating that many students commented positively and strongly.</p>
+
+      <div id="chart_div" style="height:700px;"></div>
+
+{% endblock %}

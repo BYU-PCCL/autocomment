@@ -1,0 +1,51 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+Generating Your Report
+{% endblock %}
+
+{% block maincode %}
+{% endblock %}
+
+{% block maincontent %}
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm" style="padding:15px;">
+      In order to analyze your own comments, you need to create a CSV file with all of the comments you wish to analyze.  The easiest way to do this is using BYU's student rating system.
+    </div>
+  </div> <!-- /row -->
+  
+  <div class="row">
+    <div class="col-sm">
+      <h3>Step 1:</h3>
+      Go to <a href="https://ratings.byu.edu/" target=_blank>https://ratings.byu.edu/</a>.  Click on <b>"View Student Ratings reports"</b>.
+    </div>
+    <div class="col-sm">
+      <img src="step1.png" width="400px">
+    </div>
+  </div> <!-- /row -->
+  
+  <div class="row">
+    <div class="col-sm">
+      <h3>Step 2:</h3>
+        Under the section titled "Summative Student Ratings Reports", click on the button titled <b>"View Report"</b>.  This will bring up a pop-up.  Select the <b>first semester</b> which you wish to analyze; the report will automatically contain all comments from then until your most recent class.
+    </div>
+    <div class="col-sm">
+      <img src="step2.png" width="400px">      
+    </div>
+  </div> <!-- /row -->
+  
+  <div class="row">
+    <div class="col-sm">
+      <h3>Step 3:</h3>
+      The result will be a page that contains a summative report at the top.  <b>Below the summative report</b> is a section containing all of your comments.  There is a button titled <b>"Download comments in .csv format"</b>.  Click the button, and save the resulting file.  That's the file you need!
+    </div>
+    <div class="col-sm">
+      <img src="step3.png" width="400px">
+    </div>
+  </div> <!-- /row -->
+  
+</div>    
+      
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+Entity Sentiment
+{% endblock %}
+
+{% block maincode %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      
+      google.charts.load('current', {'packages':['corechart','table','controls']});
+      google.charts.setOnLoadCallback(drawChart);
+      
+      function drawChart() {
+
+        // Create the data tables.
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Entity');
+        data.addColumn('number', 'Sentiment');
+        data.addColumn('number', 'Magnitude');
+        data.addColumn('number', 'Count');      
+        data.addRows([
+{% for c in data %}
+  ['{{ c[0] }}', {{c[1]}}, {{c[2]}}, {{c[3]}} ],
+{% endfor %}      
+        ]);
+
+        // var options = {
+        //   title: '',
+        //   hAxis: {title: 'Mean sentiment', minValue:-1.1, maxValue:1.1},
+        //   vAxis: { textPosition: 'none' }, //{title: 'Mean magnitude'},
+        //   sizeAxis: { minValue:0, maxValue:2, minSize:5, maxSize:10 },
+        //   bubble: {textStyle: {fontSize: 11}, opacity:0.3},
+        //   //chartArea: {'width': '80%', 'height': '90%'},
+        //   // explorer: {},   // turn on explorer mode
+        // };
+        // var chart = new google.visualization.BubbleChart(document.getElementById('chart_div'));
+        // chart.draw(data, options);
+
+        data.sort({column: 1, desc: true});
+      
+        var view = new google.visualization.DataView(data);
+        view.setColumns([0,1]);
+
+        options = {
+          legend: { position: "none" },
+          chartArea: {'height': '80%'},
+        };
+        var table = new google.visualization.BarChart(document.getElementById('chart_div'));
+        table.draw( view, options);
+      
+      }
+      
+    </script>
+
+{% endblock %}
+
+{% block maincontent %}
+
+<p style="margin-top:1rem;margin-bottom:0;">This display shows individual "entities" extracted automatically from comments - these could include people, ideas, or concepts such as "labs" or "lectures".  Each entity is scored with a sentiment and magnitude; entities that are mentioned at least 10 times are plotted here.  If not all entities are visible, you can mouse over individual bars to see which words were extracted.</p>
+
+<center>
+  <div id="chart_div" style="height:700px;"></div>
+</center>
+
+{% endblock %}

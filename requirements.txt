@@ -1,0 +1,9 @@
+google-cloud-language
+jinja2
+tqdm
+wordcloud
+nltk
+tensorflow
+tensorflow_hub
+scikit-learn
+numpy

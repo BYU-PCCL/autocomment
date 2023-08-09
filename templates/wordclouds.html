@@ -1,0 +1,48 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+Word Clouds
+{% endblock %}
+
+{% block maincode %}
+   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+
+    var global_e;
+    var global_view;
+      
+    </script>
+{% endblock %}
+
+{% block maincontent %}
+
+<p style="margin-top:1rem;margin-bottom:0;">This shows the frequency of words and bigrams in the comments.  Stop words have been removed, and all words have been lemmatized.  Colors are randomly assigned.</p>
+
+
+<div style="margin-top:3rem;margin-bottom:3rem;">
+  <select onchange="$('#comment_img').attr('src','clouds/'+this.value+'.png');">  
+    <option value="all_comments">Select a class:</option>
+    <option value="all_comments">All comments</option>
+    {% for c in class_list %}
+    <option value="{{c}}">{{c}}</option>    
+    {% endfor %}      
+  </select>
+
+  -or-
+  
+  <select onchange="$('#comment_img').attr('src','clouds/'+this.value+'.png');">
+    <option value="all_comments">Select a question:</option>
+    <option value="all_comments">All comments</option>
+    {% for c in question_list %}
+    <option value="{{c}}">{{c}}</option>    
+    {% endfor %}      
+  </select>
+</div>
+      
+<div style="margin-top:3rem;margin-bottom:3rem;width=100%">
+  <center>
+    <img id="comment_img" src="clouds/all_comments.png">
+  </center>
+</div>
+      
+{% endblock %}
